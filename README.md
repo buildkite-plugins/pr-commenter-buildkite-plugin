@@ -25,7 +25,7 @@ Add the following to your `pipeline.yml`:
 ## 📒 Options
 
 ### `secret-name` (optional, string)
-The environment variable that contains the value of the Discord Webhook URL. If not set, the plugin will try to get the URL from the default configuration.
+The environment variable that contains the value of the GitHub API token. If not set, the plugin will try to get the URL from the default configuration.
 
 Default: `GITHUB_TOKEN`
 
