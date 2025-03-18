@@ -1,6 +1,6 @@
 services:
   golangci-lint:
-    image: golangci/golangci-lint:v1.54.1
+    image: golangci/golangci-lint:v1.64.8
     working_dir: /plugin
     volumes:
       - ..:/plugin
