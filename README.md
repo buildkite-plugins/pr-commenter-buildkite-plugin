@@ -1,4 +1,4 @@
-# PR Commenter Plugin
+# PR Commenter Plugin [![Build status](https://badge.buildkite.com/70e1d545dabb9e07d0c52537f5ae31e4d1f225e130e33ebcae.svg?branch=main)](https://buildkite.com/buildkite/plugins-pr-commenter)
 A Buildkite plugin written in Go that enables commenting on pull requests that builds are triggered from.
 
 The plugin uses the `/issues` endpoint as that doesn't require a commit SHA or file name in order to post the comment; this comment will post to the `conversation` tab and won't be associated with any file changes.
