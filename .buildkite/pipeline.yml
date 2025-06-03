@@ -5,7 +5,7 @@ steps:
   - name: ":golangci-lint: lint"
     command: golangci-lint run --verbose --timeout 3m
     plugins:
-      - docker-compose#v5.9.0:
+      - docker-compose#v5.10.0:
           config: .buildkite/compose.yaml
           run: golangci-lint
           tty: true
@@ -14,7 +14,7 @@ steps:
     commands:
       - go test -cover -v ./...
     plugins:
-      -  docker-compose#v5.9.0:
+      -  docker-compose#v5.10.0:
           config: .buildkite/compose.yaml
           run: golangci-lint
           tty: true
