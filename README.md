@@ -34,6 +34,15 @@ The message which should be posted to the PR. This can be a dynamic value, such 
 
 Default: `[https://buildkite.com/mock-org/cool-pipeline/builds/420#step-id](https://buildkite.com/mock-org/cool-pipeline/builds/420#step-id) exited with code 0`
 
+## Compatibility
+
+| Elastic Stack | Agent Stack K8s | Hosted (Mac) | Hosted (Linux) | Notes |
+| :-----------: | :-------------: | :----: | :----: |:---- |
+| ✅ | ⚠️ | ✅ | ✅ | K8s: The `go` binary will need to be available on the agents |
+
+- ✅ Fully supported (all combinations of attributes have been tested to pass)
+- ⚠️ Partially supported (some combinations cause errors/issues)
+
 ## 🛠️ Development
 ### Running the tests
 The tests are written using Go's built-in testing package.
