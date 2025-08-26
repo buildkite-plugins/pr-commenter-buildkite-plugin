@@ -35,7 +35,7 @@ func run() exitCode {
 
 	prNumber := os.Getenv("BUILDKITE_PULL_REQUEST")
 	if prNumber == "false" {
-		fmt.Fprintf(os.Stdout, "Not a pull request. Exiting gracefully.\n")
+		_, _ = fmt.Fprintf(os.Stdout, "Not a pull request. Exiting gracefully.\n")
 		return exitOK
 	}
 
