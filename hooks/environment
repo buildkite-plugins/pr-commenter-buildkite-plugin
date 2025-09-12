@@ -27,4 +27,4 @@ build_dir="$(dirname "$d")"
 
 echo "~~~ :electric_plug: Building plugin hooks"
 echo "Building for ${HOST_GOOS} on ${HOST_GOARCH}"
-docker run --rm -v "${build_dir}":/plugin -w /plugin -e GOOS=${HOST_GOOS} -e GOARCH=${HOST_GOARCH} golang:latest go build -o hooks/pre-exit
+cd "${build_dir}" && go build -o hooks/pre-exit
