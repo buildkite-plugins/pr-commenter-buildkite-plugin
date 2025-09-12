@@ -15,9 +15,9 @@ Add the following to your `pipeline.yml`:
 
 ```yaml
     steps:
-        command: echo "cool plugin!"
+        command: echo "~~~ :github: Add approval comment Pull Request"
         plugins:
-            - pr-commenter#v0.0.1:
+            - pr-commenter#v0.1.0:
                 message: "LGTM!"
                 secret-name: GITHUB_TOKEN
 ```
@@ -32,7 +32,7 @@ Default: `GITHUB_TOKEN`
 ### `message` (optional, string)
 The message which should be posted to the PR. This can be a dynamic value, such as `$BUILDKITE_COMMAND`
 
-Default: `[https://buildkite.com/mock-org/cool-pipeline/builds/420#step-id](https://buildkite.com/mock-org/cool-pipeline/builds/420#step-id) exited with code 0`
+Default: `[${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}](${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}) exited with code ${BUILDKITE_COMMAND_EXIT_STATUS}`
 
 ## Compatibility
 
