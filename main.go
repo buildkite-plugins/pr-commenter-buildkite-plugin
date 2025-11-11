@@ -27,7 +27,11 @@ func main() {
 func run() exitCode {
 	ctx := context.Background()
 
-	owner, repo, err := repo.ParseRepo(os.Getenv("BUILDKITE_REPO"))
+	repoName, ok := os.LookupEnv("BUILDKITE_PULL_REQUEST_REPO")
+	if !ok {
+		repoName = os.Getenv("BUILDKITE_REPO")
+	}
+	owner, repo, err := repo.ParseRepo(repoName)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error parsing repo info: %s\n", err)
 		return exitError
