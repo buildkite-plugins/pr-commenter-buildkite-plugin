@@ -81,19 +81,31 @@ func (c *Commenter) FindExistingComment(ctx context.Context, owner string, repo 
 		return nil, err
 	}
 
-	comments, _, err := c.client.ListComments(ctx, owner, repo, numberConverted, nil)
-	if err != nil {
-		return nil, err
+	opt := &github.IssueListCommentsOptions{
+		ListOptions: github.ListOptions{PerPage: 100},
 	}
-	for _, comment := range comments {
-		if comment.Body != nil && strings.Contains(*comment.Body, c.messageId) {
-			return comment, nil
+	for {
+		comments, resp, err := c.client.ListComments(ctx, owner, repo, numberConverted, opt)
+		if err != nil {
+			return nil, err
 		}
+		for _, comment := range comments {
+			if comment.Body != nil && strings.Contains(*comment.Body, c.messageId) {
+				return comment, nil
+			}
+		}
+		if resp.NextPage == 0 {
+			break
+		}
+		opt.Page = resp.NextPage
 	}
 	return nil, nil
 }
 
 func (c *Commenter) MatchBody(ctx context.Context, comment *github.IssueComment, message string) bool {
 	// Match for exact body content
+	if comment == nil || comment.Body == nil {
+		return false
+	}
 	return c.formatBody(message) == *comment.Body
 }
