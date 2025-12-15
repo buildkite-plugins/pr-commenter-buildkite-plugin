@@ -60,7 +60,11 @@ func run() exitCode {
 		fmt.Fprintf(os.Stderr, "Error creating GitHub client: %s\n", err)
 		return exitError
 	}
-	commenter := comment.NewCommenter(client)
+	commenter, err := comment.NewCommenter(client)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error configuring commenter: %s\n", err)
+		return exitError
+	}
 
 	message, found := os.LookupEnv(common.PluginPrefix + "MESSAGE")
 	if !found {

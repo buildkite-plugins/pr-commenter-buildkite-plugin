@@ -11,10 +11,13 @@ The use of this plugin requires that clusters are being used and that the secret
 
 ## 👩‍💻 Usage
 
+>The plugin expects at least one of `BUILDKITE_STEP_KEY` or `BUILDKITE_LABEL` to be set for proper usage.
+
 Add the following to your `pipeline.yml`:
 
 ```yaml
     steps:
+        key: approval-comment
         command: echo "~~~ :github: Add approval comment Pull Request"
         plugins:
             - pr-commenter#v0.3.0:
@@ -24,9 +27,11 @@ Add the following to your `pipeline.yml`:
 
 ### Enabling "Sticky" comments
 
-Set `allow-repeats: false` in order to post and update a single comment.
+Set `allow-repeats: false` in order to post and update a single comment. This configuration relies on `BUILDKITE_STEP_KEY` or `BUILDKITE_LABEL` being set _**and unique to the step**_.
+
 ```yaml
     steps:
+        key: approval-comment
         command: echo "~~~ :github: Add approval comment Pull Request"
         plugins:
             - pr-commenter#v0.3.0:
