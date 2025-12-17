@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strconv"
 
 	"prcommenter/internal/common"
 	"prcommenter/internal/github"
@@ -39,7 +40,7 @@ func run() exitCode {
 
 	prNumber := os.Getenv("BUILDKITE_PULL_REQUEST")
 	if prNumber == "false" {
-		fmt.Fprintf(os.Stdout, "Not a pull request. Exiting gracefully.\n")
+		_, _ = fmt.Fprintf(os.Stdout, "Not a pull request. Exiting gracefully.\n")
 		return exitOK
 	}
 
@@ -59,6 +60,11 @@ func run() exitCode {
 		fmt.Fprintf(os.Stderr, "Error creating GitHub client: %s\n", err)
 		return exitError
 	}
+	commenter, err := comment.NewCommenter(client)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error configuring commenter: %s\n", err)
+		return exitError
+	}
 
 	message, found := os.LookupEnv(common.PluginPrefix + "MESSAGE")
 	if !found {
@@ -66,7 +72,43 @@ func run() exitCode {
 		message = fmt.Sprintf("[%s](%s) exited with code %s", fullStepURL, fullStepURL, os.Getenv("BUILDKITE_COMMAND_EXIT_STATUS"))
 	}
 
-	err = comment.Post(ctx, client, owner, repo, prNumber, message)
+	var allowRepeats = true
+	// Allow for setting a "allow-repeats: false" plugin option to prevent duplicate comments
+	allowRepeatsVal, found := os.LookupEnv(common.PluginPrefix + "ALLOW_REPEATS")
+	if found {
+		// if this fails, allowRepeats val will just be the default (true)
+		allowRepeats, _ = strconv.ParseBool(allowRepeatsVal)
+	}
+
+	// Check for existing comment using the internal "message id", and update body if necessary
+	if !allowRepeats {
+		comment, err := commenter.FindExistingComment(ctx, owner, repo, prNumber)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error fetching existing comments: %s\n", err)
+			return exitError
+		}
+		if comment != nil {
+			// existing comment found, check comment body for exact match
+			// and update if body/message has changed
+			if commenter.MatchBody(ctx, comment, message) {
+				// Comment body/message unchanged, no action needed
+				_, _ = fmt.Fprintf(os.Stdout, "Found matching comment: %s\n", *comment.HTMLURL)
+			} else {
+				// Body does not match, update comment
+				err = commenter.UpdateComment(ctx, owner, repo, message, *comment.ID)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error updating existing comment %s: %s\n", *comment.HTMLURL, err)
+					return exitError
+				}
+				_, _ = fmt.Fprintf(os.Stdout, "Updated matching comment: %s\n", *comment.HTMLURL)
+			}
+			return exitOK
+		}
+	}
+
+	// If we're here, we didn't find an existing comment or allowRepeats is true (ie. post duplicate comments)
+	// Post a new comment
+	err = commenter.Post(ctx, owner, repo, prNumber, message)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error posting comment: %s\n", err)
 	}

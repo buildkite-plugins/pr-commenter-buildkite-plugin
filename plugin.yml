@@ -10,5 +10,12 @@ configuration:
       type: string
     secret-name:
       type: string
+    allow-repeats:
+      type: boolean
+      description: "Allow identical comments to be posted every time the plugin is run"
+      default: true
+    message-id:
+      type: string
+      description: "Unique ID of the message to be posted, used to identify existing comments (allow-repeats: false). Use if plugin is used more than once in same job."
   required:
     - secret-name
