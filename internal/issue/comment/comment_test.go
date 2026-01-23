@@ -86,12 +86,12 @@ func TestFindExistingComment_Found(t *testing.T) {
 
 	commenter, _ := comment.NewCommenter(mockClient)
 	result, err := commenter.FindExistingComment(context.Background(), "testdev", "hello", "320")
-
 	if err != nil {
 		t.Fatalf("unexpected error: %s", err)
 	}
 	if result == nil {
 		t.Fatal("expected comment to be found, got nil")
+		return
 	}
 	if *result.ID != expectedID {
 		t.Errorf("expected ID %d, got %d", expectedID, *result.ID)
@@ -120,7 +120,6 @@ func TestUpdateComment_Success(t *testing.T) {
 
 	commenter, _ := comment.NewCommenter(mockClient)
 	err := commenter.UpdateComment(context.Background(), "testdev", "hello", "Updated comment", commentID)
-
 	if err != nil {
 		t.Fatalf("unexpected error: %s", err)
 	}

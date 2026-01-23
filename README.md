@@ -13,6 +13,8 @@ The use of this plugin requires that clusters are being used and that the secret
 
 >The plugin expects at least one of `BUILDKITE_STEP_KEY` or `BUILDKITE_LABEL` to be set for proper usage.
 
+### Using a Personal Access Token (PAT)
+
 Add the following to your `pipeline.yml`:
 
 ```yaml
@@ -20,10 +22,34 @@ Add the following to your `pipeline.yml`:
         key: approval-comment
         command: echo "~~~ :github: Add approval comment Pull Request"
         plugins:
-            - pr-commenter#v0.3.0:
+            - pr-commenter#v1.0.0:
                 message: "LGTM!"
                 secret-name: GITHUB_TOKEN
 ```
+
+### Using a GitHub App (recommended)
+
+GitHub App authentication provides short-lived tokens that expire after 1 hour, improving security over long-lived PATs.
+
+```yaml
+    steps:
+        key: approval-comment
+        command: echo "~~~ :github: Add approval comment Pull Request"
+        plugins:
+            - pr-commenter#v1.0.0:
+                message: "LGTM!"
+                app-id: "123456"
+                private-key: GITHUB_APP_PRIVATE_KEY
+```
+
+To set up a GitHub App:
+1. Create a GitHub App in your organization or personal account settings
+2. Grant the app **Pull requests: Read and write** permission
+3. Install the app on the repositories you want to comment on
+4. Store the app's private key as a Buildkite secret
+5. Use the App ID and private key secret name in your pipeline configuration
+
+The plugin will automatically discover the installation ID for the repository.
 
 ### Enabling "Sticky" comments
 
@@ -34,7 +60,7 @@ Set `allow-repeats: false` in order to post and update a single comment. This co
         key: approval-comment
         command: echo "~~~ :github: Add approval comment Pull Request"
         plugins:
-            - pr-commenter#v0.3.0:
+            - pr-commenter#v1.0.0:
                 message: "LGTM!"
                 secret-name: GITHUB_TOKEN
                 allow-repeats: false
@@ -42,10 +68,22 @@ Set `allow-repeats: false` in order to post and update a single comment. This co
 
 ## 📒 Options
 
+### Authentication Options
+
+You must provide either `secret-name` (for PAT authentication) or both `app-id` and `private-key` (for GitHub App authentication).
+
 ### `secret-name` (optional, string)
-The environment variable that contains the value of the GitHub API token. If not set, the plugin will try to get the URL from the default configuration.
+The name of the Buildkite secret containing a GitHub personal access token.
 
 Default: `GITHUB_TOKEN`
+
+### `app-id` (optional, string)
+The GitHub App App ID. Required for GitHub App authentication.
+
+### `private-key` (optional, string)
+The name of the Buildkite secret containing the GitHub App private key in PEM format. Required for GitHub App authentication.
+
+### Message Options
 
 ### `message` (optional, string)
 The message which should be posted to the PR. This can be a dynamic value, such as `$BUILDKITE_COMMAND`

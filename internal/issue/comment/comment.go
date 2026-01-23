@@ -15,7 +15,7 @@ import (
 
 type Commenter struct {
 	client    GitHubClient
-	messageId string
+	messageID string
 }
 
 type GitHubClient interface {
@@ -31,24 +31,24 @@ func NewCommenter(client GitHubClient) (*Commenter, error) {
 	if !found {
 		stepKey, found = os.LookupEnv("BUILDKITE_LABEL")
 		if !found {
-			return nil, errors.New("At least one of BUILDKITE_STEP_KEY or BUILDKITE_LABEL must be set.")
+			return nil, errors.New("at least one of BUILDKITE_STEP_KEY or BUILDKITE_LABEL must be set")
 		}
 	}
 
-	messageId := fmt.Sprintf("%s:%s:pr-commenter-buildkite-plugin", os.Getenv("BUILDKITE_PIPELINE_SLUG"), stepKey)
-	uniqueId, found := os.LookupEnv(common.PluginPrefix + "MESSAGE_ID")
+	messageID := fmt.Sprintf("%s:%s:pr-commenter-buildkite-plugin", os.Getenv("BUILDKITE_PIPELINE_SLUG"), stepKey)
+	uniqueID, found := os.LookupEnv(common.PluginPrefix + "MESSAGE_ID")
 	if found {
-		messageId = fmt.Sprintf("%s:%s", messageId, uniqueId)
+		messageID = fmt.Sprintf("%s:%s", messageID, uniqueID)
 	}
 
 	return &Commenter{
 		client:    client,
-		messageId: messageId,
+		messageID: messageID,
 	}, nil
 }
 
 func (c *Commenter) formatBody(message string) string {
-	return fmt.Sprintf("%s\n\n<!-- %s -->", message, c.messageId)
+	return fmt.Sprintf("%s\n\n<!-- %s -->", message, c.messageID)
 }
 
 func (c *Commenter) Post(ctx context.Context, owner string, repo string, number string, message string) error {
@@ -98,7 +98,7 @@ func (c *Commenter) FindExistingComment(ctx context.Context, owner string, repo 
 			return nil, err
 		}
 		for _, comment := range comments {
-			if comment.Body != nil && strings.Contains(*comment.Body, c.messageId) {
+			if comment.Body != nil && strings.Contains(*comment.Body, c.messageID) {
 				return comment, nil
 			}
 		}

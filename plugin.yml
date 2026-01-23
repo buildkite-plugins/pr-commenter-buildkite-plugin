@@ -10,6 +10,13 @@ configuration:
       type: string
     secret-name:
       type: string
+      description: "Name of the Buildkite secret containing a GitHub personal access token. Required if not using GitHub App authentication."
+    app-id:
+      type: string
+      description: "GitHub App ID (integer). Required for GitHub App authentication."
+    private-key:
+      type: string
+      description: "GitHub App private key in PEM format, or name of a Buildkite secret containing it. Required for GitHub App authentication."
     allow-repeats:
       type: boolean
       description: "Allow identical comments to be posted every time the plugin is run"
@@ -17,5 +24,4 @@ configuration:
     message-id:
       type: string
       description: "Unique ID of the message to be posted, used to identify existing comments (allow-repeats: false). Use if plugin is used more than once in same job."
-  required:
-    - secret-name
+  additionalProperties: false

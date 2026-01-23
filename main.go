@@ -44,14 +44,9 @@ func run() exitCode {
 		return exitOK
 	}
 
-	secretName, found := os.LookupEnv(common.PluginPrefix + "SECRET_NAME")
-	if !found {
-		secretName = "GITHUB_TOKEN"
-	}
-
-	token, err := secret.GetSecret(secretName)
+	token, err := getGitHubToken(ctx, owner, repo)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error retrieving secret: %s\n", err)
+		fmt.Fprintf(os.Stderr, "Error getting GitHub token: %s\n", err)
 		return exitError
 	}
 
@@ -72,7 +67,7 @@ func run() exitCode {
 		message = fmt.Sprintf("[%s](%s) exited with code %s", fullStepURL, fullStepURL, os.Getenv("BUILDKITE_COMMAND_EXIT_STATUS"))
 	}
 
-	var allowRepeats = true
+	allowRepeats := true
 	// Allow for setting a "allow-repeats: false" plugin option to prevent duplicate comments
 	allowRepeatsVal, found := os.LookupEnv(common.PluginPrefix + "ALLOW_REPEATS")
 	if found {
@@ -115,4 +110,30 @@ func run() exitCode {
 
 	fmt.Println("Comment posted successfully")
 	return exitOK
+}
+
+// getGitHubToken returns a GitHub token using either GitHub App or PAT authentication.
+func getGitHubToken(ctx context.Context, owner, repo string) (string, error) {
+	appID, hasAppID := os.LookupEnv(common.PluginPrefix + "APP_ID")
+	privateKey, hasPrivateKey := os.LookupEnv(common.PluginPrefix + "PRIVATE_KEY")
+
+	// GitHub App authentication
+	if hasAppID && hasPrivateKey {
+		// Try to get private key from Buildkite secrets first
+		privateKeyPEM, err := secret.GetSecret(privateKey)
+		if err != nil {
+			// If secret retrieval fails, treat private-key as the literal PEM content
+			privateKeyPEM = privateKey
+		}
+
+		return github.GetAppToken(ctx, appID, []byte(privateKeyPEM), owner, repo)
+	}
+
+	// Fall back to PAT authentication
+	secretName, found := os.LookupEnv(common.PluginPrefix + "SECRET_NAME")
+	if !found {
+		secretName = "GITHUB_TOKEN"
+	}
+
+	return secret.GetSecret(secretName)
 }
