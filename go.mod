@@ -2,7 +2,7 @@ module prcommenter
 
 go 1.24.0
 
-toolchain go1.24.12
+toolchain go1.25.7
 
 require (
 	github.com/google/go-github v17.0.0+incompatible
