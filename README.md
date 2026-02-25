@@ -43,7 +43,7 @@ Set `allow-repeats: false` in order to post and update a single comment. This co
 ## 📒 Options
 
 ### `secret-name` (optional, string)
-The environment variable that contains the value of the GitHub API token. If not set, the plugin will try to get the URL from the default configuration.
+The name of the environment variable or Buildkite Secret that contains the value of the GitHub API token.
 
 Default: `GITHUB_TOKEN`
 
