@@ -27,4 +27,13 @@ build_dir="$(dirname "$d")"
 
 echo "~~~ :electric_plug: Building plugin hooks"
 echo "Building for ${HOST_GOOS} on ${HOST_GOARCH}"
-cd "${build_dir}" && go build -o hooks/pre-exit
+
+run_go () {
+    if ! command -v go >/dev/null 2>&1; then
+        docker run -w /opt -v .:/opt "${BUILDKITE_PLUGIN_PR_COMMENTER_GO_DOCKER_IMAGE:-golang:alpine}" go "$@"
+    else
+        go "$@"
+    fi
+}
+
+cd "${build_dir}" && run_go build -o hooks/pre-exit

@@ -19,3 +19,7 @@ configuration:
     message-id:
       type: string
       description: "Unique ID of the message to be posted, used to identify existing comments (allow-repeats: false). Use if plugin is used more than once in same job."
+    go-docker-image:
+      type: string
+      default: "golang:alpine"
+      description: "Docker image to use to run Go to build the plugin hooks. Only necessary if Go is not already present on the agent."
