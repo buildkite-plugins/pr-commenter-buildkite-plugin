@@ -31,7 +31,7 @@ func NewCommenter(client GitHubClient) (*Commenter, error) {
 	if !found {
 		stepKey, found = os.LookupEnv("BUILDKITE_LABEL")
 		if !found {
-			return nil, errors.New("At least one of BUILDKITE_STEP_KEY or BUILDKITE_LABEL must be set.")
+			return nil, errors.New("at least one of BUILDKITE_STEP_KEY or BUILDKITE_LABEL must be set")
 		}
 	}
 
