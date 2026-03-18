@@ -1,9 +1,11 @@
 package main
 
 import (
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"prcommenter/internal/secret"
@@ -46,7 +48,7 @@ func TestRun_CanceledBuild_SkipsComment(t *testing.T) {
 
 // TestRun_CanceledBuild_FileExists_Proceeds verifies that when a build is canceled
 // but deploy_status.md was written before cancellation, the plugin proceeds normally
-// (attempts secret retrieval rather than skipping).
+// (does not print the cancellation skip message).
 func TestRun_CanceledBuild_FileExists_Proceeds(t *testing.T) {
 	setupCommonEnv(t)
 	mockSecret(t)
@@ -58,15 +60,20 @@ func TestRun_CanceledBuild_FileExists_Proceeds(t *testing.T) {
 	t.Setenv("BUILDKITE_PLUGIN_PR_COMMENTER_MESSAGE_PATH", existingFile)
 	t.Setenv("BUILDKITE_COMMAND_EXIT_STATUS", "-1")
 
-	// Should not short-circuit — it proceeds past the cancellation check and
-	// attempts to post a comment. With a fake token it will fail at the GitHub
-	// API call, but that confirms the early-exit was not triggered.
-	result := run()
-	if result == exitOK {
-		// exitOK here would mean either the comment posted (unlikely with fake token)
-		// or the cancellation check incorrectly fired despite the file existing.
-		// Either way, verify the file was actually read (not skipped).
-		t.Log("run() returned exitOK — verify comment was attempted, not silently skipped")
+	// Capture stdout to verify the cancellation skip message was NOT printed.
+	r, w, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	origStdout := os.Stdout
+	os.Stdout = w
+	run()
+	w.Close()
+	os.Stdout = origStdout
+	out, _ := io.ReadAll(r)
+
+	if strings.Contains(string(out), "Build was canceled, skipping comment") {
+		t.Error("early-exit fired despite deploy_status.md existing — cancellation check should not skip when file is present")
 	}
 }
 

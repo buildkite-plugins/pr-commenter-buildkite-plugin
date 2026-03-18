@@ -85,10 +85,6 @@ func run() exitCode {
 		if found {
 			m, err := os.ReadFile(messagePath)
 			if err != nil {
-				if os.IsNotExist(err) && os.Getenv("BUILDKITE_COMMAND_EXIT_STATUS") == "-1" {
-					fmt.Fprintf(os.Stdout, "Build was canceled, skipping comment\n")
-					return exitOK
-				}
 				fmt.Fprintf(os.Stderr, "Error reading message-path file: %s\n", err)
 				return exitError
 			}
