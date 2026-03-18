@@ -47,7 +47,7 @@ func run() exitCode {
 	// If the build was canceled and message-path is configured but the file doesn't exist,
 	// skip early before attempting secret retrieval which may be unavailable on canceled builds.
 	if os.Getenv("BUILDKITE_COMMAND_EXIT_STATUS") == "-1" {
-		if messagePath, found := os.LookupEnv(common.PluginPrefix + "MESSAGE_PATH"); found {
+		if messagePath, found := os.LookupEnv(common.PluginPrefix + "MESSAGE_PATH"); found && messagePath != "" {
 			if _, err := os.Stat(messagePath); os.IsNotExist(err) {
 				fmt.Println("Build was canceled, skipping comment")
 				return exitOK
@@ -82,7 +82,7 @@ func run() exitCode {
 		// Check if message-path has been set
 		// and read in the provided file for the message content
 		messagePath, found := os.LookupEnv(common.PluginPrefix + "MESSAGE_PATH")
-		if found {
+		if found && messagePath != "" {
 			m, err := os.ReadFile(messagePath)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Error reading message-path file: %s\n", err)
@@ -136,8 +136,8 @@ func run() exitCode {
 	err = commenter.Post(ctx, owner, repo, prNumber, message)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error posting comment: %s\n", err)
+		return exitError
 	}
-
 	fmt.Println("Comment posted successfully")
 	return exitOK
 }

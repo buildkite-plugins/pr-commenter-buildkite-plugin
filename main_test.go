@@ -92,3 +92,31 @@ func TestRun_UnexpectedFailure_ReturnsError(t *testing.T) {
 		t.Errorf("expected exitError for unexpected failure with missing message-path, got %d", result)
 	}
 }
+
+// TestRun_PostFailure_ReturnsError verifies that when posting the comment fails
+// (e.g. invalid token), run() returns exitError rather than silently succeeding.
+func TestRun_PostFailure_ReturnsError(t *testing.T) {
+	setupCommonEnv(t)
+	mockSecret(t)
+	// No MESSAGE or MESSAGE_PATH — falls through to default message.
+	// Post will fail with 401 from the fake token, which should surface as exitError.
+	if result := run(); result != exitError {
+		t.Errorf("expected exitError when Post fails with invalid token, got %d", result)
+	}
+}
+
+// TestRun_EmptyMessagePath_TreatedAsUnset verifies that MESSAGE_PATH="" is ignored
+// (treated as not set) rather than attempting to read a file at path "".
+func TestRun_EmptyMessagePath_TreatedAsUnset(t *testing.T) {
+	setupCommonEnv(t)
+	mockSecret(t)
+	t.Setenv("BUILDKITE_PLUGIN_PR_COMMENTER_MESSAGE_PATH", "")
+	t.Setenv("BUILDKITE_COMMAND_EXIT_STATUS", "0")
+
+	// Empty path should be treated as unset — plugin falls back to default message
+	// and attempts Post (which fails with fake token → exitError, not a file I/O error).
+	result := run()
+	if result != exitError {
+		t.Errorf("expected exitError (Post with fake token), got %d — empty MESSAGE_PATH may have caused a file read error", result)
+	}
+}

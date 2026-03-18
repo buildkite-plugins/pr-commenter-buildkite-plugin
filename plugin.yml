@@ -13,6 +13,7 @@ configuration:
       description: "Path to a file containing the message to be posted"
     secret-name:
       type: string
+      description: "Name of the Buildkite secret holding the GitHub API token. Defaults to GITHUB_TOKEN."
     allow-repeats:
       type: boolean
       description: "Allow identical comments to be posted every time the plugin is run"
@@ -20,5 +21,4 @@ configuration:
     message-id:
       type: string
       description: "Unique ID of the message to be posted, used to identify existing comments (allow-repeats: false). Use if plugin is used more than once in same job."
-  required:
-    - secret-name
+  required: []

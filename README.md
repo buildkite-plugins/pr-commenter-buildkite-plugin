@@ -56,7 +56,7 @@ Since the value of `message` is set/interpolated at the start of the pipeline (u
 ## 📒 Options
 
 ### `secret-name` (optional, string)
-The environment variable that contains the value of the GitHub API token. If not set, the plugin will try to get the URL from the default configuration.
+The name of the Buildkite secret that holds the GitHub API token. If not set, the plugin uses the secret named `GITHUB_TOKEN`.
 
 Default: `GITHUB_TOKEN`
 
@@ -66,12 +66,12 @@ The message which should be posted to the PR. This can be a dynamic value, such 
 Default: `[${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}](${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}) exited with code ${BUILDKITE_COMMAND_EXIT_STATUS}`
 
 ### `message-path` (optional, string)
-The path to a file containing the message which should be posted to the PR. If both `message` and `message-path` are set, the plugin will use the value provided for `message`. 
+The path to a file containing the message which should be posted to the PR. If both `message` and `message-path` are set, the plugin will use the value provided for `message`. If the step is canceled and the file was never written, the plugin skips posting a comment and does not fail the build.
 
 Default: `null`
 
 ### `allow-repeats` (optional, boolean)
-Whether to Allow identical comments to be posted every time the plugin is run. Disabling this (`allow-repeats: false`) will cause the plugin to post a single "sticky" comment, which will be updated on subsequent runs if the message changes.
+Whether to allow identical comments to be posted every time the plugin is run. Disabling this (`allow-repeats: false`) will cause the plugin to post a single "sticky" comment, which will be updated on subsequent runs if the message changes.
 
 Default: `true`
 
