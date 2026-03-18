@@ -3,7 +3,7 @@ A Buildkite plugin written in Go that enables commenting on pull requests that b
 
 The plugin uses the `/issues` endpoint as that doesn't require a commit SHA or file name in order to post the comment; this comment will post to the `conversation` tab and won't be associated with any file changes.
 
-The plugin has been tested and built using **go 1.20.3**, so it is not guaranteed to work on versions **<1.20.3**.
+The plugin has been tested and built using **go 1.24**. It may work on older versions but is not guaranteed.
 
 The plugin binary will get built in the step and output as a `pre-exit` hook. This ensures that it runs as the last command on the step and is able to get the *exit code* of the step that it runs on (necessary for the default message).
 
