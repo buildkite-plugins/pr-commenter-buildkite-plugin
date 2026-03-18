@@ -44,6 +44,7 @@ Set `allow-repeats: false` in order to post and update a single comment. This co
 Since the value of `message` is set/interpolated at the start of the pipeline (upload), `message-path` can be used to post message content generated during a step.
 ```yaml
     steps:
+        key: dynamic-comment
         command: echo "~~~ :github: Add approval comment Pull Request"
         plugins:
             - pr-commenter#v0.4.1:
