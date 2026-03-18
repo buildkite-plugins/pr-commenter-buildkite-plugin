@@ -44,6 +44,17 @@ func run() exitCode {
 		return exitOK
 	}
 
+	// If the build was canceled and message-path is configured but the file doesn't exist,
+	// skip early before attempting secret retrieval which may be unavailable on canceled builds.
+	if os.Getenv("BUILDKITE_COMMAND_EXIT_STATUS") == "-1" {
+		if messagePath, found := os.LookupEnv(common.PluginPrefix + "MESSAGE_PATH"); found {
+			if _, err := os.Stat(messagePath); os.IsNotExist(err) {
+				fmt.Println("Build was canceled, skipping comment")
+				return exitOK
+			}
+		}
+	}
+
 	secretName, found := os.LookupEnv(common.PluginPrefix + "SECRET_NAME")
 	if !found {
 		secretName = "GITHUB_TOKEN"
