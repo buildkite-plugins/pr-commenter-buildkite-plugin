@@ -60,7 +60,11 @@ func run() exitCode {
 		fmt.Fprintf(os.Stderr, "Error creating GitHub client: %s\n", err)
 		return exitError
 	}
-	commenter := comment.NewCommenter(client)
+	commenter, err := comment.NewCommenter(client)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error configuring commenter: %s\n", err)
+		return exitError
+	}
 
 	message, found := os.LookupEnv(common.PluginPrefix + "MESSAGE")
 	if !found {
@@ -70,6 +74,10 @@ func run() exitCode {
 		if found {
 			m, err := os.ReadFile(messagePath)
 			if err != nil {
+				if os.IsNotExist(err) && os.Getenv("BUILDKITE_COMMAND_EXIT_STATUS") == "-1" {
+					fmt.Fprintf(os.Stdout, "Build was canceled, skipping comment\n")
+					return exitOK
+				}
 				fmt.Fprintf(os.Stderr, "Error reading message-path file: %s\n", err)
 				return exitError
 			}

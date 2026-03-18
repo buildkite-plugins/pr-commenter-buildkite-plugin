@@ -17,7 +17,7 @@ Add the following to your `pipeline.yml`:
     steps:
         command: echo "~~~ :github: Add approval comment Pull Request"
         plugins:
-            - pr-commenter#v0.4.0:
+            - pr-commenter#v0.4.1:
                 message: "LGTM!"
                 secret-name: GITHUB_TOKEN
 ```
@@ -29,7 +29,7 @@ Set `allow-repeats: false` in order to post and update a single comment.
     steps:
         command: echo "~~~ :github: Add approval comment Pull Request"
         plugins:
-            - pr-commenter#v0.4.0:
+            - pr-commenter#v0.4.1:
                 message: "LGTM!"
                 secret-name: GITHUB_TOKEN
                 allow-repeats: false
@@ -42,7 +42,7 @@ Since the value of `message` is set/interpolated at the start of the pipeline (u
     steps:
         command: echo "~~~ :github: Add approval comment Pull Request"
         plugins:
-            - pr-commenter#v0.4.0:
+            - pr-commenter#v0.4.1:
                 message-path: "pr-comment.md"
                 secret-name: GITHUB_TOKEN
                 allow-repeats: false
