@@ -3,11 +3,11 @@ A Buildkite plugin written in Go that enables commenting on pull requests that b
 
 The plugin uses the `/issues` endpoint as that doesn't require a commit SHA or file name in order to post the comment; this comment will post to the `conversation` tab and won't be associated with any file changes.
 
-The plugin has been tested and built using **go 1.20.3**, so it is not guaranteed to work on versions **<1.20.3**.
+The plugin has been tested and built using **go 1.24.0**, so it is not guaranteed to work on versions **<1.24.0**.
 
 The plugin binary will get built in the step and output as a `pre-exit` hook. This ensures that it runs as the last command on the step and is able to get the *exit code* of the step that it runs on (necessary for the default message).
 
-The use of this plugin requires that clusters are being used and that the secret is available on that cluster, else the plugin will error.
+The use of this plugin requires that the secret is available as a Buildkite secret, else the plugin will error.
 
 ## 👩‍💻 Usage
 
@@ -20,7 +20,7 @@ Add the following to your `pipeline.yml`:
         key: approval-comment
         command: echo "~~~ :github: Add approval comment Pull Request"
         plugins:
-            - pr-commenter#v0.3.0:
+            - pr-commenter#v0.4.0:
                 message: "LGTM!"
                 secret-name: GITHUB_TOKEN
 ```
@@ -34,7 +34,7 @@ Set `allow-repeats: false` in order to post and update a single comment. This co
         key: approval-comment
         command: echo "~~~ :github: Add approval comment Pull Request"
         plugins:
-            - pr-commenter#v0.3.0:
+            - pr-commenter#v0.4.0:
                 message: "LGTM!"
                 secret-name: GITHUB_TOKEN
                 allow-repeats: false
@@ -43,7 +43,7 @@ Set `allow-repeats: false` in order to post and update a single comment. This co
 ## 📒 Options
 
 ### `secret-name` (optional, string)
-The environment variable that contains the value of the GitHub API token. If not set, the plugin will try to get the URL from the default configuration.
+The Buildkite secret that contains the value of the GitHub API token. Can be set to any Buildkite secret key name. If not provided, defaults to GITHUB_TOKEN. If no secret with that name exists, the plugin will error.
 
 Default: `GITHUB_TOKEN`
 
