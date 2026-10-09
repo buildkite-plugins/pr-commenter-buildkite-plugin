@@ -18,11 +18,32 @@ type exitCode int
 const (
 	exitOK    exitCode = 0
 	exitError exitCode = 1
+
+	defaultSecretName = "GITHUB_TOKEN"
 )
 
 func main() {
 	err := run()
 	os.Exit(int(err))
+}
+
+func resolveToken() (string, error) {
+	tokenEnv, hasTokenEnv := os.LookupEnv(common.PluginPrefix + "TOKEN_ENV")
+	secretName, hasSecretName := os.LookupEnv(common.PluginPrefix + "SECRET_NAME")
+
+	if hasTokenEnv && hasSecretName {
+		return "", fmt.Errorf("token-env and secret-name are mutually exclusive")
+	}
+
+	if hasTokenEnv {
+		return secret.GetEnvironmentToken(tokenEnv)
+	}
+
+	if !hasSecretName {
+		secretName = defaultSecretName
+	}
+
+	return secret.GetSecret(secretName)
 }
 
 func run() exitCode {
@@ -44,14 +65,9 @@ func run() exitCode {
 		return exitOK
 	}
 
-	secretName, found := os.LookupEnv(common.PluginPrefix + "SECRET_NAME")
-	if !found {
-		secretName = "GITHUB_TOKEN"
-	}
-
-	token, err := secret.GetSecret(secretName)
+	token, err := resolveToken()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error retrieving secret: %s\n", err)
+		fmt.Fprintf(os.Stderr, "Error retrieving token: %s\n", err)
 		return exitError
 	}
 
