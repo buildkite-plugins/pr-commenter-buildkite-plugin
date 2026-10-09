@@ -10,6 +10,11 @@ configuration:
       type: string
     secret-name:
       type: string
+      minLength: 1
+    token-env:
+      type: string
+      minLength: 1
+      description: "Name of an environment variable containing the GitHub API token. Cannot be used with secret-name."
     allow-repeats:
       type: boolean
       description: "Allow identical comments to be posted every time the plugin is run"
@@ -17,5 +22,7 @@ configuration:
     message-id:
       type: string
       description: "Unique ID of the message to be posted, used to identify existing comments (allow-repeats: false). Use if plugin is used more than once in same job."
-  required:
-    - secret-name
+  not:
+    required:
+      - secret-name
+      - token-env
