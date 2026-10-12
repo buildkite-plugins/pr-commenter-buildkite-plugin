@@ -7,7 +7,7 @@ The plugin has been tested and built using **go 1.24.0**, so it is not guarantee
 
 The plugin binary will get built in the step and output as a `pre-exit` hook. This ensures that it runs as the last command on the step and is able to get the *exit code* of the step that it runs on (necessary for the default message).
 
-The use of this plugin requires that the secret is available as a Buildkite secret, else the plugin will error.
+The GitHub API token can be retrieved from a Buildkite Secret or read from an environment variable populated by an earlier hook or plugin. By default, the plugin retrieves the Buildkite Secret named `GITHUB_TOKEN`.
 
 ## 👩‍💻 Usage
 
@@ -16,13 +16,13 @@ The use of this plugin requires that the secret is available as a Buildkite secr
 Add the following to your `pipeline.yml`:
 
 ```yaml
-    steps:
-        key: approval-comment
-        command: echo "~~~ :github: Add approval comment Pull Request"
-        plugins:
-            - pr-commenter#v0.4.0:
-                message: "LGTM!"
-                secret-name: GITHUB_TOKEN
+steps:
+  - key: approval-comment
+    command: 'echo "~~~ :github: Add approval comment Pull Request"'
+    plugins:
+      - pr-commenter#v0.5.0:
+          message: "LGTM!"
+          secret-name: GITHUB_TOKEN
 ```
 
 ### Enabling "Sticky" comments
@@ -30,22 +30,48 @@ Add the following to your `pipeline.yml`:
 Set `allow-repeats: false` in order to post and update a single comment. This configuration relies on `BUILDKITE_STEP_KEY` or `BUILDKITE_LABEL` being set _**and unique to the step**_.
 
 ```yaml
-    steps:
-        key: approval-comment
-        command: echo "~~~ :github: Add approval comment Pull Request"
-        plugins:
-            - pr-commenter#v0.4.0:
-                message: "LGTM!"
-                secret-name: GITHUB_TOKEN
-                allow-repeats: false
+steps:
+  - key: approval-comment
+    command: 'echo "~~~ :github: Add approval comment Pull Request"'
+    plugins:
+      - pr-commenter#v0.5.0:
+          message: "LGTM!"
+          secret-name: GITHUB_TOKEN
+          allow-repeats: false
 ```
 
 ## 📒 Options
 
 ### `secret-name` (optional, string)
-The Buildkite secret that contains the value of the GitHub API token. Can be set to any Buildkite secret key name. If not provided, defaults to GITHUB_TOKEN. If no secret with that name exists, the plugin will error.
+The Buildkite Secret containing the GitHub API token. It can be set to any Buildkite Secret name. If neither `secret-name` nor `token-env` is provided, it defaults to `GITHUB_TOKEN`. If no secret with that name exists, the plugin will error.
 
 Default: `GITHUB_TOKEN`
+
+### `token-env` (optional, string)
+The name of an environment variable containing the GitHub API token. This is useful when an earlier hook or plugin retrieves the token from an external secrets manager. The referenced variable must exist and contain a non-empty value when this plugin's `pre-exit` hook runs.
+
+`token-env` and `secret-name` are mutually exclusive within one plugin configuration. If neither is configured, the plugin retrieves the Buildkite Secret named `GITHUB_TOKEN`.
+
+Do not put the token value itself in this option or in pipeline YAML; provide only the environment variable name. If the selected Buildkite Secret or environment variable cannot provide a token, the plugin's `pre-exit` hook fails and the job will fail.
+
+#### Using AWS SSM Parameter Store
+
+The [`aws-ssm` plugin](https://github.com/buildkite-plugins/aws-ssm-buildkite-plugin) exports parameters during its `pre-command` hook. The PR Commenter can read the resulting environment variable during `pre-exit`:
+
+```yaml
+steps:
+  - key: approval-comment
+    command: 'echo "~~~ :github: Add approval comment Pull Request"'
+    plugins:
+      - aws-ssm#v1.1.0:
+          parameters:
+            PR_COMMENTER_GITHUB_TOKEN: /buildkite/github/pr-commenter-token
+      - pr-commenter#v0.5.0:
+          message: "LGTM!"
+          token-env: PR_COMMENTER_GITHUB_TOKEN
+```
+
+The token is available to the job command and later hooks once it has been exported. Use a GitHub token with the minimum permissions required to comment on pull requests, and take particular care with builds originating from untrusted forks.
 
 ### `message` (optional, string)
 The message which should be posted to the PR. This can be a dynamic value, such as `$BUILDKITE_COMMAND`
