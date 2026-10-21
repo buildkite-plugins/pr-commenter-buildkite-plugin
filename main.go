@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"runtime"
 	"strconv"
 
 	"prcommenter/internal/common"
@@ -12,7 +11,6 @@ import (
 	"prcommenter/internal/issue/comment"
 	"prcommenter/internal/repo"
 	"prcommenter/internal/secret"
-	"prcommenter/internal/toolchain"
 )
 
 type exitCode int
@@ -49,11 +47,6 @@ func resolveToken() (string, error) {
 }
 
 func run() exitCode {
-	if err := toolchain.Check(runtime.Version()); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		return exitError
-	}
-
 	ctx := context.Background()
 
 	repoName, ok := os.LookupEnv("BUILDKITE_PULL_REQUEST_REPO")

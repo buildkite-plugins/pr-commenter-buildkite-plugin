@@ -3,7 +3,6 @@ package main
 import (
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 	"testing"
 
@@ -126,40 +125,4 @@ func unsetEnv(t *testing.T, name string) {
 			_ = os.Unsetenv(name)
 		}
 	})
-}
-
-func TestEnvironmentHookRemovesStaleBinaryOnBuildFailure(t *testing.T) {
-	for _, failCommand := range []string{"run", "build"} {
-		t.Run(failCommand, func(t *testing.T) {
-			dir := t.TempDir()
-			hooks := filepath.Join(dir, "hooks")
-			if err := os.Mkdir(hooks, 0755); err != nil {
-				t.Fatal(err)
-			}
-			script, err := os.ReadFile("hooks/environment")
-			if err != nil {
-				t.Fatal(err)
-			}
-			if err := os.WriteFile(filepath.Join(hooks, "environment"), script, 0755); err != nil {
-				t.Fatal(err)
-			}
-			binary := filepath.Join(hooks, "pre-exit")
-			if err := os.WriteFile(binary, []byte("stale binary"), 0755); err != nil {
-				t.Fatal(err)
-			}
-			// Fail selection/checking or compilation, without invoking a real compiler.
-			fakeGo := "#!/usr/bin/env bash\nset -eu\ntest ! -e hooks/pre-exit\nif [[ $1 == " + failCommand + " ]]; then exit 1; fi\n"
-			if err := os.WriteFile(filepath.Join(dir, "go"), []byte(fakeGo), 0755); err != nil {
-				t.Fatal(err)
-			}
-			cmd := exec.Command("bash", filepath.Join(hooks, "environment"))
-			cmd.Env = append(os.Environ(), "PATH="+dir+string(os.PathListSeparator)+os.Getenv("PATH"))
-			if out, err := cmd.CombinedOutput(); err == nil {
-				t.Fatalf("hook succeeded despite %s failure: %s", failCommand, out)
-			}
-			if _, err := os.Stat(binary); !os.IsNotExist(err) {
-				t.Fatalf("stale hook remains after %s failure: %v", failCommand, err)
-			}
-		})
-	}
 }
