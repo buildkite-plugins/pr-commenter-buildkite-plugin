@@ -6,7 +6,7 @@ services:
       - ..:/plugin
       - ~/.cache/golangci-lint/v1.54.1:/root/.cache
   golang:
-    image: golang:1.26.10-bookworm
+    image: golang:1.27.3-bookworm
     working_dir: /plugin
     environment:
       GOTOOLCHAIN: local
