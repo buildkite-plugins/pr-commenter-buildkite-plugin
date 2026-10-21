@@ -27,4 +27,9 @@ build_dir="$(dirname "$d")"
 
 echo "~~~ :electric_plug: Building plugin hooks"
 echo "Building for ${HOST_GOOS} on ${HOST_GOARCH}"
-cd "${build_dir}" && go build -o hooks/pre-exit
+cd "${build_dir}"
+# Never leave a previous hook available if selecting or checking Go fails.
+rm -f hooks/pre-exit
+# Check the compiler Go actually selects, including GOTOOLCHAIN overrides.
+go run ./cmd/check-toolchain
+go build -o hooks/pre-exit

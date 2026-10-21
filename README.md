@@ -3,7 +3,9 @@ A Buildkite plugin written in Go that enables commenting on pull requests that b
 
 The plugin uses the `/issues` endpoint as that doesn't require a commit SHA or file name in order to post the comment; this comment will post to the `conversation` tab and won't be associated with any file changes.
 
-The plugin has been tested and built using **go 1.24.0**, so it is not guaranteed to work on versions **<1.24.0**.
+The agent's selected Go compiler must be a stable **Go 1.26.10+ (1.26 series)** or **Go 1.27.3+** release. Older releases, including Go 1.27.0–1.27.2, and development/prerelease builds are rejected because they lack the required TLS certificate verification fixes. Go 1.26.10 is the preferred build version.
+
+The environment hook checks the selected compiler before building, including when `GOTOOLCHAIN=local` is set. Go's automatic toolchain selection may download a suitable compiler; agents with downloads disabled must install a supported version themselves. The generated hook also checks its compiler version before retrieving or using a token.
 
 The plugin binary will get built in the step and output as a `pre-exit` hook. This ensures that it runs as the last command on the step and is able to get the *exit code* of the step that it runs on (necessary for the default message).
 
@@ -98,12 +100,16 @@ Default: `null`
 - ⚠️ Partially supported (some combinations cause errors/issues)
 
 ## 🛠️ Development
+Deploy this plugin revision and rerun its environment hook to replace cached `hooks/pre-exit` binaries on agents. Existing plugin checkouts/binaries are not retroactively fixed; update agent-provided Go installations and keep agent trust stores current. This plugin does not manage agent images or system CA stores.
+
 ### Running the tests
 The tests are written using Go's built-in testing package.
 
 Tests can be run using:
 
 ```shell
+bash hooks/environment
+go version -m hooks/pre-exit
 go test -v ./...
 ```
 

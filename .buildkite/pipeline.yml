@@ -12,10 +12,12 @@ steps:
 
   - name: ":go: test"
     commands:
+      - bash hooks/environment
+      - go version -m hooks/pre-exit
       - go test -cover -v ./...
     plugins:
       -  docker-compose#v5.12.1:
           config: .buildkite/compose.yaml
-          run: golangci-lint
+          run: golang
           tty: true
           mount-buildkite-agent: true
